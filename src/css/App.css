@@ -1,0 +1,155 @@
+
+.home-background{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 'white';
+}
+.nav-spacer{
+  flex-grow: 0.125;
+}
+.nav-link-custom {
+  font-weight: bold !important;
+  color: rgb(0, 0, 0) !important;
+}
+
+
+.flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  height: 100vh;
+}
+/*  Apply margin and background gradient*/
+.grid-container {
+  display: grid;
+  gap: 2px; 
+  border: 2px solid black;
+  background-image: -webkit-repeating-linear-gradient(blue, red, purple);
+
+}
+/* Remove border */
+.grid-box {
+  /* border: 1px solid #ffffff; */
+  /* border-radius: 5%; */
+  background-color: rgb(255, 255, 255);
+  width: 24px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.isStart-cell{
+  background-color: green;
+  /* border-radius: 5%; */
+  width: 24px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.isFinish-cell{
+  background-color: red;
+  /* border-radius: 5%; */
+  width: 24px;
+  height: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.isWall-cell{
+  background-color: #000000;
+}
+.isPath-cell{
+  background-color: rgb(255, 210, 87);
+}
+
+.hover-isStart{
+  background-color: rgba(1, 202, 1, 0.781)
+}
+.hover-isFinish{
+  background-color: rgba(255, 0, 0, 0.685);
+}
+.hover-isWall{
+  background-color: #000000b6;
+}
+
+.visited-cell::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  background-image: radial-gradient(circle at center, #06f5e9, #0579d8);
+  border-radius: 50%;
+  z-index: 10;
+  animation: fill 3s ease-in-out forwards;
+}
+
+.visited-cell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle at center, #06f5e9, #0579d8);
+  opacity: 0;
+  z-index: 5;
+  animation: gradientFade 3s linear forwards;
+}
+
+@keyframes fill {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  50% {
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes gradientFade {
+  0% {
+    opacity: 0;
+  }
+  /* 25% {
+    opacity: 0.5;
+  } */
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+    background-color: hsl(180, 100%, 50%);
+    background-image: none;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
