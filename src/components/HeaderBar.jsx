@@ -1,9 +1,5 @@
 import React, { Component } from 'react'
-import { NavLink } from 'react-bootstrap';
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
+import { Navbar, Container, Nav, NavDropdown, NavLink, Toast, Button } from 'react-bootstrap';
 
 
 export default class Header extends Component {
@@ -13,8 +9,36 @@ export default class Header extends Component {
             editStart: false,
             editFinish: false,
             editWalls: false,
+            algorithmType: "",
+            showToast: false,
         }
     }
+  
+  handleShow = () => {
+    this.setState({ showToast: true });
+  };
+
+  handleClose = () => {
+    this.setState({ showToast: false });
+  };
+
+  setAlgorithmType=(algorithm)=>{
+    this.setState({algorithmType: algorithm});
+  }
+  visualizeAlgorithm = () => {
+    const { pathFinder, inAnimationState, setInAnimation } = this.props.headerContextProps;
+    const { algorithmType } = this.state;
+    if(algorithmType === ""){
+      this.handleShow();
+    }
+    if (algorithmType === 'Dijkstra' && !inAnimationState) {
+      setInAnimation(true);
+      pathFinder();
+    } else {
+      
+      console.log('Please select an algorithm');
+    }
+  };
 
   toggleEditMode = (selectedMode) => {
     const { cellSelectionMode, cellSelectionToggle, changeCellType } = this.props.headerContextProps;
@@ -47,10 +71,30 @@ export default class Header extends Component {
 
   render() {
     const {genRBTMaze, genPrimsMaze ,pathFinder, clearBoard, inAnimationState, setInAnimation} = this.props.headerContextProps;
-
+    const { showToast } = this.state;
     return (
-      <>
-          <Navbar bg="light" expand="lg">
+      <>  
+      <div>
+        <Toast
+          onClose={this.handleClose}
+          show={showToast}
+          delay={3000}
+          autohide
+          style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            zIndex:100,
+          }}
+        >
+          <Toast.Header>
+            <strong className="mr-auto">Notification</strong>
+          </Toast.Header>
+          <Toast.Body><strong>Please Select an Algorithm!</strong></Toast.Body>
+        </Toast>
+      </div>
+      
+          <Navbar bg="light" expand="lg" className="navbar">
             <Container>
               <Navbar.Brand className="nav-link-custom" >Pathfinder Visualizer</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -58,32 +102,31 @@ export default class Header extends Component {
                 <Nav className="w-100">
                 
                   <NavDropdown className="nav-link-custom" title="Mazes" id="basic-nav-dropdown" disabled={inAnimationState}>
-                    <NavDropdown.Item onClick={() => genRBTMaze()}>Recursive Backtracking</NavDropdown.Item>
-                    <NavDropdown.Item onClick={() => genPrimsMaze()}>Prim's Algorithm</NavDropdown.Item>
+                    <NavDropdown.Item onClick={()=>{
+                    if (!this.props.headerContextProps.inAnimationState) {
+                      setInAnimation(true);
+                      genRBTMaze();
+                    }}}>Recursive Backtracking
+                    </NavDropdown.Item>
+
+                    <NavDropdown.Item onClick={()=>{
+                    if (!this.props.headerContextProps.inAnimationState) {
+                      setInAnimation(true);
+                      genPrimsMaze();
+                    }
+                  }}>Prim's Algorithm</NavDropdown.Item>
                   </NavDropdown>
                   
 
                   <NavDropdown className="nav-link-custom" title="Algorithms" id="basic-nav-dropdown" disabled={inAnimationState}>
-                    <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                    <NavDropdown.Item href="#action/3.2">
-                      Another action
-                    </NavDropdown.Item>
-                    <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item href="#action/3.4">
-                      Separated link
-                    </NavDropdown.Item>
+                    <NavDropdown.Item onClick={()=>{this.setAlgorithmType('Dijkstra')}} disabled={inAnimationState}>Dijkstra's Algorithm </NavDropdown.Item>
+                    <NavDropdown.Item disabled={true}>A* Search </NavDropdown.Item>
                   </NavDropdown>
 
-                  <NavLink className="nav-link-custom" onClick={()=>{
-                    if (!this.props.headerContextProps.inAnimationState) {
-                      setInAnimation(true);
-                      pathFinder();
-                    }
-                  }}
-                  disabled={inAnimationState}>
-                  Visualize
-                </NavLink>
+                  <NavLink className="nav-link-custom" onClick={()=>{this.visualizeAlgorithm()}}
+                    disabled={inAnimationState}>
+                    Visualize {this.state.algorithmType}
+                  </NavLink>
 
                   <div className="nav-spacer"></div>
                     <NavLink className="nav-link-custom" onClick={() => this.toggleEditMode("editStart")} disabled={inAnimationState}>Source</NavLink>

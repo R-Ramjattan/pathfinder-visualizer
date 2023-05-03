@@ -27,6 +27,7 @@ export default class Visualizer extends Component {
   componentDidMount() {
     this.loadGrid();
   }
+  //Cell object init
   createCell(row, col, startCell, finishCell) {
     return {
       row,
@@ -70,10 +71,11 @@ export default class Visualizer extends Component {
     this.setState({newWallsSet: new Set()} );
     
   };
+  //Enable inAnimation state to disable header buttons
   setInAnimation = (inAnimation) => {
     this.setState({ inAnimation: inAnimation }, ()=>{console.log(this.state.inAnimation)});
   };
-
+  //Generate Recursive backtracking maze
   genRBTMaze=()=>{
     this.clearBoard();
     const { rows, cols, startCell, finishCell} = this.state;
@@ -83,6 +85,7 @@ export default class Visualizer extends Component {
     this.placeMaze(grid);
 
   }
+  //Generate Prim's maze
   genPrimsMaze=()=>{
     this.clearBoard();
     const { rows, cols, startCell, finishCell} = this.state;
@@ -122,6 +125,7 @@ export default class Visualizer extends Component {
             startTime = undefined;
           }else{
             this.setState({ grid: updatedGrid});
+            this.setState({inAnimation: false});
             return;
           }
         }
@@ -157,6 +161,7 @@ export default class Visualizer extends Component {
             startTime = undefined;
           }else{
             this.setState({ grid: updatedGrid});
+            this.setState({inAnimation: false});
             return;
           }
         }
@@ -165,7 +170,7 @@ export default class Visualizer extends Component {
     window.requestAnimationFrame(animate);
 
   };
-
+  //Call Dijkstra's algorithm
   pathFinder = () => {
     const { grid, startCell, finishCell, isWall } = this.state;
     const { visitedCellsInOrder, reconstructedPath } = dijkstra.dijkstra(
@@ -182,7 +187,7 @@ export default class Visualizer extends Component {
     this.highlight(visitedCellsInOrder, reconstructedPath);
   };
 
-  
+  //Dijstra visualization animation
   highlight = (cellsInOrder, reconstructedPath) => {
     const animatedGrid = this.state.grid.slice();
     let startTime;
@@ -211,7 +216,7 @@ export default class Visualizer extends Component {
         } else {
           this.setState({ grid: animatedGrid});
           this.highlightPath(reconstructedPath);
-          this.setState({inAnimation: false});
+          this.setState({inAnimation: true});
           return;
         }
       }
@@ -220,36 +225,48 @@ export default class Visualizer extends Component {
   
     window.requestAnimationFrame(animate);
   };
-
+  //Highlight shortest path
   highlightPath = (reconstructedPath) => {
     const animatedGrid = this.state.grid.slice();
-    const pathAnimInterval = window.setInterval(() => {
-      let iteration = this.state.iteration;
-      if (iteration < Object.keys(reconstructedPath).length) {
-        // animatedGrid[reconstructedPath[iteration].row][reconstructedPath[iteration].col].background = '#FFFF00';
-        //Add css class to cell as isPath
-        const cellRef = this.cellRefs.get(`${reconstructedPath[iteration].row}:${reconstructedPath[iteration].col}`);
-        if (cellRef) {
-          cellRef.setIsPath(true);
-          cellRef.setVisited(false);
+    let startTime;
+    let iteration = 0;
+    const batchSize = 1;
 
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+  
+      if (progress >= 5) {
+        const endBatch = Math.min(iteration + batchSize, reconstructedPath.length);
+        
+        for (; iteration < endBatch; iteration++) {
+          const cellRef = this.cellRefs.get(`${reconstructedPath[iteration].row}:${reconstructedPath[iteration].col}`);
+          if (cellRef) {
+            cellRef.setIsPath(true);
+            cellRef.setVisited(false);
+
+          }
         }
-        iteration++;
-      } else {
-        clearInterval(pathAnimInterval);
-        iteration = 0;
-        this.setState({ iteration: iteration });
+        if (iteration < reconstructedPath.length) {
+          this.setState({ grid: animatedGrid});
+          startTime = undefined;
+        } else {
+          this.setState({ grid: animatedGrid});
+          this.setState({inAnimation : false});
+          return;
+        }
       }
-      this.setState({grid: animatedGrid, iteration:iteration});
-    }, 10);
+      window.requestAnimationFrame(animate);
+      };
     
-  };
-
+      window.requestAnimationFrame(animate);
+    }
+  //Change state for editting start, finish or walls
   changeCellType=(cellType)=>{
     this.setState({ cellToChange: cellType }, () => {
     });
   }
-  
+  //Rendering new cell types/changes
   updateCell =(newCell, newCellToChange)=>{
     const {grid, startCell, finishCell} = this.state;
     const updatedGrid = grid.slice();
@@ -274,7 +291,7 @@ export default class Visualizer extends Component {
     this.setState({cellSelectionMode: newState});
     
   }
-
+  //Enable cell highlighting during editting phase
   toggleDrawing=(isDrawing)=>{
     this.setState({drawing:isDrawing});
   }

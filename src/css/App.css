@@ -1,12 +1,5 @@
 
-.home-background{
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 'white';
-}
+
 .nav-spacer{
   flex-grow: 0.125;
 }
@@ -14,14 +7,21 @@
   font-weight: bold !important;
   color: rgb(0, 0, 0) !important;
 }
+.navbar{
+  position: fixed;
+  height: 50px;
+}
 
 
 .flex-container {
   display: flex;
+  margin: 0 auto;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   align-self: center;
-  height: 100vh;
+  width: 80%;
+  height: 90vh;
 }
 /*  Apply margin and background gradient*/
 .grid-container {
@@ -33,8 +33,7 @@
 }
 /* Remove border */
 .grid-box {
-  /* border: 1px solid #ffffff; */
-  /* border-radius: 5%; */
+  flex: 1;
   background-color: rgb(255, 255, 255);
   width: 24px;
   height: 24px;
