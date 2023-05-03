@@ -71,7 +71,6 @@ export default class Visualizer extends Component {
     
   };
   setInAnimation = (inAnimation) => {
-    console.log(this.state.inAnimation);
     this.setState({ inAnimation: inAnimation }, ()=>{console.log(this.state.inAnimation)});
   };
 
@@ -89,9 +88,51 @@ export default class Visualizer extends Component {
     const { rows, cols, startCell, finishCell} = this.state;
     const contextProps = { rows, cols, startCell, finishCell};
     const animatedGrid = recursiveMaze.primsGen(contextProps);
-    this.setState({grid: animatedGrid});
+    this.removeWalls(animatedGrid);
+    // this.setState({grid: animatedGrid});
   }
 
+  // Animated wall removal config
+  removeWalls =(animatedGrid)=>{
+    let iteration = 0;
+    const updatedGrid = this.state.grid.slice();
+    updatedGrid.forEach((row, rowID) =>{
+      row.forEach((cell, cellIndex) =>{
+        if(!cell.isStart && !cell.isFinish){
+          cell.isWall = true;
+        }
+      })
+    });
+    let startTime;
+    const batchSize = 4;
+
+    const animate = (timestamp) => {
+      if(!startTime) startTime = timestamp;
+        const progress = timestamp - startTime;
+        
+        if(progress >= 5){
+          const endBatch = Math.min(iteration + batchSize, animatedGrid.length);
+          for(; iteration < endBatch; iteration++){
+            
+            const currentWall = animatedGrid[iteration];
+            updatedGrid[currentWall.row][currentWall.col].isWall = false;
+          }
+          if(iteration < animatedGrid.length){
+            this.setState({grid: updatedGrid});
+            startTime = undefined;
+          }else{
+            this.setState({ grid: updatedGrid});
+            return;
+          }
+        }
+        window.requestAnimationFrame(animate);
+    }
+    window.requestAnimationFrame(animate);
+
+    this.setState({grid:updatedGrid});
+  };
+
+  // Animated wall placement config
   placeMaze = (animatedGrid) => {
     const wallArray = Array.from(animatedGrid);
     let iteration = 0;
