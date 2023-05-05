@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Cell from "../components/Cell";
 import * as dijkstra from "../algorithms/dijkstraAlgo";
+import * as astar from "../algorithms/astarAlgo";
 import * as recursiveMaze from "../mazeAlgorithms/recursiveMaze";
 import HeaderBar from '../components/HeaderBar';
 export default class Visualizer extends Component {
@@ -11,7 +12,7 @@ export default class Visualizer extends Component {
       grid: [],
       rows: 32,
       cols: 58,
-      startCell: { row: 13, col: 5},
+      startCell: { row: 7, col: 15},
       finishCell: { row: 13, col: 32 },
       iteration: 0,
       cellSelectionMode: false,
@@ -56,38 +57,46 @@ export default class Visualizer extends Component {
     }
     this.setState({ grid: newGrid });
   }
-  clearBoard = () => {
-    this.state.grid.forEach((row, rowID) =>{
-      row.forEach((cell, cellIndex) =>{
-        const cellId = `${rowID}:${cellIndex}`;
-        const cellRef = this.cellRefs.get(cellId);
-        if(cellRef){
-          cellRef.setVisited(false);
-          cellRef.setIsPath(false);
-        }
-      })
-    })
-    this.loadGrid();
-    this.setState({newWallsSet: new Set()} );
-    
+  clearBoard = (all) => {
+    return new Promise((resolve) => {
+      this.state.grid.forEach((row, rowID) => {
+        row.forEach((cell, cellIndex) => {
+          const cellId = `${rowID}:${cellIndex}`;
+          const cellRef = this.cellRefs.get(cellId);
+          if (cellRef) {
+            cellRef.setVisited(false);
+            cellRef.setIsPath(false);
+          }
+        });
+      });
+  
+      if(all){
+        this.loadGrid();
+        this.setState({ newWallsSet: new Set() }, resolve);
+      }else{
+        resolve();
+      }
+    });
   };
-  //Enable inAnimation state to disable header buttons
-  setInAnimation = (inAnimation) => {
-    this.setState({ inAnimation: inAnimation }, ()=>{console.log(this.state.inAnimation)});
-  };
-  //Generate Recursive backtracking maze
-  genRBTMaze=()=>{
-    this.clearBoard();
-    const { rows, cols, startCell, finishCell} = this.state;
-    const contextProps = { rows, cols, startCell, finishCell};
-
-    const grid = recursiveMaze.recursiveBT(contextProps);
-    this.placeMaze(grid);
+  clearHighlight = () => {
 
   }
+  //Enable inAnimation state to disable header buttons
+  setInAnimation = (inAnimation) => {
+    this.setState({ inAnimation: inAnimation });
+  };
+  //Generate Recursive backtracking maze
+  genRBTMaze = async () => {
+    await this.clearBoard(true);
+    const { rows, cols, startCell, finishCell } = this.state;
+    const contextProps = { rows, cols, startCell, finishCell };
+  
+    const grid = recursiveMaze.recursiveBT(contextProps);
+    this.placeMaze(grid);
+  };
   //Generate Prim's maze
-  genPrimsMaze=()=>{
-    this.clearBoard();
+  genPrimsMaze = async ()=>{
+    await this.clearBoard(true);
     const { rows, cols, startCell, finishCell} = this.state;
     const contextProps = { rows, cols, startCell, finishCell};
     const animatedGrid = recursiveMaze.primsGen(contextProps);
@@ -170,14 +179,19 @@ export default class Visualizer extends Component {
     window.requestAnimationFrame(animate);
 
   };
+  //Call A* algorithm
+  visualizeAStar=()=>{
+    const {grid, startCell, finishCell} = this.state;
+    const {visited, reconstructedPath} = astar.aStar(grid, startCell, finishCell);
+    this.highlight(visited, reconstructedPath );
+  }
   //Call Dijkstra's algorithm
   pathFinder = () => {
-    const { grid, startCell, finishCell, isWall } = this.state;
+    const { grid, startCell, finishCell } = this.state;
     const { visitedCellsInOrder, reconstructedPath } = dijkstra.dijkstra(
       grid,
       startCell,
       finishCell,
-      isWall
     );
 
     if (!visitedCellsInOrder) {
@@ -187,8 +201,9 @@ export default class Visualizer extends Component {
     this.highlight(visitedCellsInOrder, reconstructedPath);
   };
 
-  //Dijstra visualization animation
-  highlight = (cellsInOrder, reconstructedPath) => {
+  //visualization animation
+  highlight = async(cellsInOrder, reconstructedPath) => {
+    await this.clearBoard(false);
     const animatedGrid = this.state.grid.slice();
     let startTime;
     let iteration = 0;
@@ -230,7 +245,7 @@ export default class Visualizer extends Component {
     const animatedGrid = this.state.grid.slice();
     let startTime;
     let iteration = 0;
-    const batchSize = 1;
+    const batchSize = 2;
 
     const animate = (timestamp) => {
       if (!startTime) startTime = timestamp;
@@ -261,6 +276,8 @@ export default class Visualizer extends Component {
     
       window.requestAnimationFrame(animate);
     }
+
+
   //Change state for editting start, finish or walls
   changeCellType=(cellType)=>{
     this.setState({ cellToChange: cellType }, () => {
@@ -302,6 +319,7 @@ export default class Visualizer extends Component {
     changeCellType: this.changeCellType,
     genRBTMaze: this.genRBTMaze,
     pathFinder: this.pathFinder,
+    visualizeAStar: this.visualizeAStar,
     clearBoard: this.clearBoard,
     genPrimsMaze: this.genPrimsMaze,
     setInAnimation: this.setInAnimation,

@@ -47,7 +47,7 @@ export function recursiveBT(contextProps) {
         }
       }
 
-    recursiveBacktracking(startCell.row, startCell.col);
+    recursiveBacktracking(startCell.col, startCell.row);
     grid[startCell.row][startCell.col].isStart = true;
     grid[finishCell.row][finishCell.col].isFinish = true;
     // Remove walls from start and finish cells, if any
@@ -117,7 +117,6 @@ export function primsGen(contextProps) {
         updateFrontierCells(frontierCells, frontierCell.col, frontierCell.row, passageMap);
       }
       
-      console.log(wallsRemovedInOrder);
       return wallsRemovedInOrder;
 
 

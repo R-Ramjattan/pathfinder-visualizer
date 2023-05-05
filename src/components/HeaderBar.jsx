@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Navbar, Container, Nav, NavDropdown, NavLink, Toast, Button } from 'react-bootstrap';
+import { Navbar, Container, Nav, NavDropdown, NavLink, Toast} from 'react-bootstrap';
 
 
 export default class Header extends Component {
@@ -26,7 +26,7 @@ export default class Header extends Component {
     this.setState({algorithmType: algorithm});
   }
   visualizeAlgorithm = () => {
-    const { pathFinder, inAnimationState, setInAnimation } = this.props.headerContextProps;
+    const { pathFinder, visualizeAStar,inAnimationState, setInAnimation } = this.props.headerContextProps;
     const { algorithmType } = this.state;
     if(algorithmType === ""){
       this.handleShow();
@@ -34,10 +34,11 @@ export default class Header extends Component {
     if (algorithmType === 'Dijkstra' && !inAnimationState) {
       setInAnimation(true);
       pathFinder();
-    } else {
-      
-      console.log('Please select an algorithm');
-    }
+    } 
+    if (algorithmType === 'A*' && !inAnimationState) {
+      setInAnimation(true);
+      visualizeAStar();
+    } 
   };
 
   toggleEditMode = (selectedMode) => {
@@ -70,7 +71,7 @@ export default class Header extends Component {
   };
 
   render() {
-    const {genRBTMaze, genPrimsMaze ,pathFinder, clearBoard, inAnimationState, setInAnimation} = this.props.headerContextProps;
+    const {genRBTMaze, genPrimsMaze , clearBoard, inAnimationState, setInAnimation} = this.props.headerContextProps;
     const { showToast } = this.state;
     return (
       <>  
@@ -120,7 +121,7 @@ export default class Header extends Component {
 
                   <NavDropdown className="nav-link-custom" title="Algorithms" id="basic-nav-dropdown" disabled={inAnimationState}>
                     <NavDropdown.Item onClick={()=>{this.setAlgorithmType('Dijkstra')}} disabled={inAnimationState}>Dijkstra's Algorithm </NavDropdown.Item>
-                    <NavDropdown.Item disabled={true}>A* Search </NavDropdown.Item>
+                    <NavDropdown.Item onClick={()=>{this.setAlgorithmType('A*')}} disabled={inAnimationState}>A* Search </NavDropdown.Item>
                   </NavDropdown>
 
                   <NavLink className="nav-link-custom" onClick={()=>{this.visualizeAlgorithm()}}
@@ -132,7 +133,7 @@ export default class Header extends Component {
                     <NavLink className="nav-link-custom" onClick={() => this.toggleEditMode("editStart")} disabled={inAnimationState}>Source</NavLink>
                     <NavLink className="nav-link-custom" onClick={() => this.toggleEditMode("editFinish")} disabled={inAnimationState}>Destination</NavLink>
                     <NavLink className="nav-link-custom" onClick={() => this.toggleEditMode("editWalls")} disabled={inAnimationState}>Walls</NavLink>
-                    <NavLink className="nav-link-custom" onClick={() => clearBoard()} disabled={inAnimationState}>Clear Board</NavLink>
+                    <NavLink className="nav-link-custom" onClick={() => clearBoard(true)} disabled={inAnimationState}>Clear Board</NavLink>
 
                 </Nav>
               </Navbar.Collapse>
